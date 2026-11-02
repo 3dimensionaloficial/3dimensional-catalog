@@ -30,8 +30,11 @@ export const ProductCard = ({ product, onOpenDetails }) => {
       {/* Product Image Banner */}
       <div className="relative h-52 w-full bg-slate-900 overflow-hidden">
         <img
-          src={product.image}
+          src={product.image || 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=500&q=80'}
           alt={product.name}
+          onError={(e) => {
+            e.currentTarget.src = 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=500&q=80';
+          }}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[#0d0e1b] via-transparent to-transparent" />

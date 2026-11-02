@@ -55,8 +55,11 @@ export const ProductDetailModal = ({ product, onClose }) => {
           <div className="md:col-span-6 space-y-3">
             <div className="relative h-64 sm:h-72 w-full rounded-2xl overflow-hidden bg-slate-900 border border-white/10 shadow-lg">
               <img
-                src={product.image}
+                src={product.image || 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=500&q=80'}
                 alt={product.name}
+                onError={(e) => {
+                  e.currentTarget.src = 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=500&q=80';
+                }}
                 className="w-full h-full object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#0d0e1b]/80 via-transparent to-transparent" />
