@@ -1,8 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 
 // 3Dimensional Production Supabase credentials (shared with ERP backend)
-export const DEFAULT_SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://nafolbsuyzprhcujdvnx.supabase.co';
-export const DEFAULT_SUPABASE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_KEY || 'sb_publishable_eg0FJnORSDvyplOAEuE7Sw_xoRVZwIn';
+export const DEFAULT_SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://wastqzjolyeuobgiupha.supabase.co';
+export const DEFAULT_SUPABASE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_KEY || 'sb_publishable_u99B8_1o3w1sSpGDbxgGDA_tuDXciWS';
 
 export const getStoredCredentials = () => {
   const envUrl = import.meta.env.VITE_SUPABASE_URL;
