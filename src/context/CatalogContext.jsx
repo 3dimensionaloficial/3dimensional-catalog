@@ -121,31 +121,41 @@ export const CatalogProvider = ({ children }) => {
 
   // Sync state from Supabase Cloud
   const loadFromSupabase = async () => {
-    if (!supabase) return;
+    if (!supabase) {
+      setIsCloudLive(false);
+      return;
+    }
     try {
       const { data, error } = await supabase
         .from('erp_state')
         .select('data')
         .eq('key', 'global_state')
-        .single();
+        .maybeSingle();
+
+      if (error) {
+        console.warn('Catalog live cloud sync notice:', error.message);
+        setIsCloudLive(false);
+        return;
+      }
+
+      setIsCloudLive(true);
+      setLastSyncTime(new Date());
 
       if (data && data.data) {
-        setIsCloudLive(true);
-        setLastSyncTime(new Date());
-
-        if (data.data.products) {
+        if (data.data.products && Array.isArray(data.data.products) && data.data.products.length > 0) {
           const sanitized = processRawProducts(data.data.products);
           setProducts(sanitized);
           localStorage.setItem('3d_products', JSON.stringify(data.data.products));
         }
 
-        if (data.data.categories) {
+        if (data.data.categories && Array.isArray(data.data.categories) && data.data.categories.length > 0) {
           setCategories(data.data.categories);
           localStorage.setItem('3d_categories', JSON.stringify(data.data.categories));
         }
       }
     } catch (err) {
       console.warn('Catalog live cloud sync notice:', err.message);
+      setIsCloudLive(false);
     }
   };
 

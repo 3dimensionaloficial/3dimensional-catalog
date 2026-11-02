@@ -8,8 +8,17 @@ export const getStoredCredentials = () => {
   const envUrl = import.meta.env.VITE_SUPABASE_URL;
   const envKey = import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_KEY;
 
-  const url = envUrl || localStorage.getItem('3d_supabase_url') || DEFAULT_SUPABASE_URL;
-  const key = envKey || localStorage.getItem('3d_supabase_key') || DEFAULT_SUPABASE_KEY;
+  const savedUrl = localStorage.getItem('3d_supabase_url');
+  const savedKey = localStorage.getItem('3d_supabase_key');
+
+  const isDeadUrl = savedUrl && savedUrl.includes('nafolbsuyzprhcujdvnx');
+  if (isDeadUrl) {
+    localStorage.removeItem('3d_supabase_url');
+    localStorage.removeItem('3d_supabase_key');
+  }
+
+  const url = envUrl || (!isDeadUrl && savedUrl) || DEFAULT_SUPABASE_URL;
+  const key = envKey || (!isDeadUrl && savedKey) || DEFAULT_SUPABASE_KEY;
   return { url, key };
 };
 
