@@ -35,13 +35,17 @@ const CatalogContent = () => {
   const filteredProducts = useMemo(() => {
     return products
       .filter(p => {
+        if (!p) return false;
+        const pName = p.name || '';
+        const pCat = p.category || 'Geral';
+
         // Search term filter
         const matchesSearch = 
-          p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-          p.category.toLowerCase().includes(searchTerm.toLowerCase());
+          pName.toLowerCase().includes(searchTerm.toLowerCase()) || 
+          pCat.toLowerCase().includes(searchTerm.toLowerCase());
 
         // Category filter
-        const matchesCategory = selectedCategory === 'Todas' || p.category === selectedCategory;
+        const matchesCategory = selectedCategory === 'Todas' || pCat === selectedCategory;
 
         // Price range filter
         const priceNum = Number(p.price) || 0;
@@ -54,9 +58,14 @@ const CatalogContent = () => {
         return matchesSearch && matchesCategory && matchesMinPrice && matchesMaxPrice && matchesVariableColor;
       })
       .sort((a, b) => {
-        if (sortBy === 'price-asc') return a.price - b.price;
-        if (sortBy === 'price-desc') return b.price - a.price;
-        if (sortBy === 'name-asc') return a.name.localeCompare(b.name);
+        const priceA = Number(a?.price) || 0;
+        const priceB = Number(b?.price) || 0;
+        const nameA = a?.name || '';
+        const nameB = b?.name || '';
+
+        if (sortBy === 'price-asc') return priceA - priceB;
+        if (sortBy === 'price-desc') return priceB - priceA;
+        if (sortBy === 'name-asc') return nameA.localeCompare(nameB);
         return 0; // 'featured' keeps original order
       });
   }, [products, searchTerm, selectedCategory, minPrice, maxPrice, onlyVariableColor, sortBy]);
@@ -150,11 +159,15 @@ const CatalogContent = () => {
   );
 };
 
+import { ErrorBoundary } from './components/ErrorBoundary';
+
 export function App() {
   return (
-    <CatalogProvider>
-      <CatalogContent />
-    </CatalogProvider>
+    <ErrorBoundary>
+      <CatalogProvider>
+        <CatalogContent />
+      </CatalogProvider>
+    </ErrorBoundary>
   );
 }
 

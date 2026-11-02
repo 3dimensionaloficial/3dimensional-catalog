@@ -69,17 +69,42 @@ const INITIAL_FALLBACK_PRODUCTS = [
   }
 ];
 
+// Helper to sanitize & filter products from ERP cloud payload
+export const processRawProducts = (rawProducts) => {
+  if (!Array.isArray(rawProducts)) return [];
+  
+  // STRICT REQUIREMENT: Only products from the 1st sub-tab of ERP ("Catálogo de Produtos"), NEVER from test tab!
+  // In ERP: 1st sub-tab is `!p.isTest`. 2nd sub-tab is `!!p.isTest`.
+  const catalogItems = rawProducts.filter(p => p && !p.isTest && p.name?.trim().toLowerCase() !== 'teste');
+
+  // Sanitize to only public information (STRICT PRIVACY)
+  return catalogItems.map(p => ({
+    id: p.id || ('p_' + Math.random().toString(36).substring(2, 6)),
+    name: p.name || 'Produto 3D',
+    category: p.category || 'Geral',
+    price: Number(p.price) || 0,
+    stock: Number(p.stock) || 0,
+    image: p.image || 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=500&q=80',
+    isVariableColor: !!p.isVariableColor,
+    isKit: !!p.isKit,
+    dimensions: {
+      heightCm: Number(p.dimensions?.heightCm) || 0,
+      widthCm: Number(p.dimensions?.widthCm) || 0,
+      lengthCm: Number(p.dimensions?.lengthCm) || 0,
+    },
+    kitItems: Array.isArray(p.kitItems) ? p.kitItems : []
+  }));
+};
+
 export const CatalogProvider = ({ children }) => {
   const [products, setProducts] = useState(() => {
     const saved = localStorage.getItem('3d_products');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        // Filter out test-only items that aren't approved
-        return parsed.filter(p => !p.isTest || p.testStatus === 'Aprovado' || p.testStatus === 'Aprovado (Vendido)');
-      } catch (e) {
-        return INITIAL_FALLBACK_PRODUCTS;
-      }
+        const processed = processRawProducts(parsed);
+        if (processed.length > 0) return processed;
+      } catch (e) {}
     }
     return INITIAL_FALLBACK_PRODUCTS;
   });
@@ -96,28 +121,6 @@ export const CatalogProvider = ({ children }) => {
 
   const [isCloudLive, setIsCloudLive] = useState(false);
   const [lastSyncTime, setLastSyncTime] = useState(null);
-
-  // Helper to sanitize & filter products from ERP cloud payload
-  const processRawProducts = (rawProducts) => {
-    if (!Array.isArray(rawProducts)) return [];
-    
-    // Filter only published / catalog items
-    const catalogItems = rawProducts.filter(p => !p.isTest || p.testStatus === 'Aprovado' || p.testStatus === 'Aprovado (Vendido)');
-
-    // Sanitize to only public information (STRICT PRIVACY)
-    return catalogItems.map(p => ({
-      id: p.id,
-      name: p.name,
-      category: p.category || 'Geral',
-      price: Number(p.price) || 0,
-      stock: Number(p.stock) || 0,
-      image: p.image || 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=500&q=80',
-      isVariableColor: !!p.isVariableColor,
-      isKit: !!p.isKit,
-      dimensions: p.dimensions || { heightCm: 0, widthCm: 0, lengthCm: 0 },
-      kitItems: p.kitItems || []
-    }));
-  };
 
   // Sync state from Supabase Cloud
   const loadFromSupabase = async () => {
@@ -142,10 +145,14 @@ export const CatalogProvider = ({ children }) => {
       setLastSyncTime(new Date());
 
       if (data && data.data) {
-        if (data.data.products && Array.isArray(data.data.products) && data.data.products.length > 0) {
+        if (data.data.products && Array.isArray(data.data.products)) {
           const sanitized = processRawProducts(data.data.products);
-          setProducts(sanitized);
-          localStorage.setItem('3d_products', JSON.stringify(data.data.products));
+          if (sanitized.length > 0) {
+            setProducts(sanitized);
+            localStorage.setItem('3d_products', JSON.stringify(data.data.products));
+          } else {
+            setProducts(INITIAL_FALLBACK_PRODUCTS);
+          }
         }
 
         if (data.data.categories && Array.isArray(data.data.categories) && data.data.categories.length > 0) {
@@ -174,10 +181,12 @@ export const CatalogProvider = ({ children }) => {
               setLastSyncTime(new Date());
               setIsCloudLive(true);
 
-              if (payload.new.data.products) {
+              if (payload.new.data.products && Array.isArray(payload.new.data.products)) {
                 const sanitized = processRawProducts(payload.new.data.products);
-                setProducts(sanitized);
-                localStorage.setItem('3d_products', JSON.stringify(payload.new.data.products));
+                if (sanitized.length > 0) {
+                  setProducts(sanitized);
+                  localStorage.setItem('3d_products', JSON.stringify(payload.new.data.products));
+                }
               }
 
               if (payload.new.data.categories) {

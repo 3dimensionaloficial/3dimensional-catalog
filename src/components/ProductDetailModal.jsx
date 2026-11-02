@@ -3,6 +3,7 @@ import { X, Ruler, Palette, Boxes, MessageCircle, Sparkles, CheckCircle, Package
 
 export const ProductDetailModal = ({ product, onClose }) => {
   if (!product) return null;
+  const priceNum = Number(product.price) || 0;
 
   const handleWhatsAppOrder = () => {
     const dimensionsText = product.isKit 
@@ -11,9 +12,9 @@ export const ProductDetailModal = ({ product, onClose }) => {
 
     const text = encodeURIComponent(
       `Olá 3Dimensional! Acessei o catálogo online e gostaria de encomendar o seguinte produto:\n\n` +
-      `📦 *${product.name}*\n` +
-      `🏷️ Categoria: ${product.category}\n` +
-      `💰 Valor: R$ ${product.price.toFixed(2)}\n` +
+      `📦 *${product.name || 'Produto 3D'}*\n` +
+      `🏷️ Categoria: ${product.category || 'Geral'}\n` +
+      `💰 Valor: R$ ${priceNum.toFixed(2)}\n` +
       `📏 Dimensões: ${dimensionsText}\n` +
       (product.isVariableColor ? `🎨 *Gostaria de combinar as cores personalizadas do meu pedido!*\n\n` : `\n`) +
       `Por favor, me informe o prazo de entrega e formas de pagamento!`
@@ -71,7 +72,7 @@ export const ProductDetailModal = ({ product, onClose }) => {
               
               <div className="mt-3 flex items-baseline gap-2">
                 <span className="text-2xl font-extrabold font-heading text-emerald-400">
-                  R$ {product.price.toFixed(2)}
+                  R$ {priceNum.toFixed(2)}
                 </span>
                 <span className="text-xs text-slate-400 font-medium">
                   (Preço de Venda / Encomenda)

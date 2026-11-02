@@ -2,19 +2,21 @@ import React from 'react';
 import { Palette, Ruler, Boxes, Eye, MessageCircle, ArrowUpRight } from 'lucide-react';
 
 export const ProductCard = ({ product, onOpenDetails }) => {
+  const priceNum = Number(product?.price) || 0;
+
   const handleWhatsAppOrder = (e) => {
     e.stopPropagation();
-    const dimensionsText = product.isKit 
-      ? `Kit com ${product.kitItems?.length || 0} peças`
-      : `${product.dimensions?.heightCm || 0}cm (alt) × ${product.dimensions?.widthCm || 0}cm (larg) × ${product.dimensions?.lengthCm || 0}cm (comp)`;
+    const dimensionsText = product?.isKit 
+      ? `Kit com ${product?.kitItems?.length || 0} peças`
+      : `${product?.dimensions?.heightCm || 0}cm (alt) × ${product?.dimensions?.widthCm || 0}cm (larg) × ${product?.dimensions?.lengthCm || 0}cm (comp)`;
 
     const text = encodeURIComponent(
       `Olá 3Dimensional! Tenho interesse em encomendar o produto:\n\n` +
-      `📦 *${product.name}*\n` +
-      `🏷️ Categoria: ${product.category}\n` +
-      `💰 Preço: R$ ${product.price.toFixed(2)}\n` +
+      `📦 *${product?.name || 'Produto 3D'}*\n` +
+      `🏷️ Categoria: ${product?.category || 'Geral'}\n` +
+      `💰 Preço: R$ ${priceNum.toFixed(2)}\n` +
       `📏 Dimensões: ${dimensionsText}\n` +
-      (product.isVariableColor ? `🎨 *Gostaria de verificar as opções de cores disponíveis!*\n\n` : `\n`) +
+      (product?.isVariableColor ? `🎨 *Gostaria de verificar as opções de cores disponíveis!*\n\n` : `\n`) +
       `Poderiam me passar mais detalhes sobre prazo de produção?`
     );
     window.open(`https://wa.me/?text=${text}`, '_blank');
@@ -97,7 +99,7 @@ export const ProductCard = ({ product, onOpenDetails }) => {
             <div>
               <span className="text-[10px] text-slate-400 uppercase tracking-wider block">Valor de Venda</span>
               <span className="text-xl font-extrabold font-heading text-emerald-400">
-                R$ {product.price.toFixed(2)}
+                R$ {priceNum.toFixed(2)}
               </span>
             </div>
 
